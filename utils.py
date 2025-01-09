@@ -177,18 +177,18 @@ def display(private_invitations):
 
             # Wildcard            
             if any('*' in url for url in scopes):
-                has_wildcard = green("✔️")
+                has_wildcard = green("X")
                 points += 3
             else:
-                has_wildcard = orange("X")
+                has_wildcard = orange("-")
                 points += 1
 
             # Program vpn
             if program['vpn_active']:
-                vpn = green("✔️ ")
+                vpn = green("X")
                 points += 1
             else:
-                vpn = orange("X")
+                vpn = orange("-")
                 points += 0
 
             # Reports counts            
@@ -318,10 +318,10 @@ def display(private_invitations):
 
             # Program credentials
             if len(program['credentials_pool']) > 0:
-                credz = green("✔️")
+                credz = green("X")
                 points += len(program['credentials_pool']) / 2
             else:
-                credz = orange("X")
+                credz = orange("-")
                 points += 0
         
 
@@ -346,7 +346,7 @@ def display(private_invitations):
             
     data.sort(key=lambda x: x[0], reverse=True)
     
-    results = PrettyTable(field_names=["Pts", "Name", "Creation date", "Last update", "Last hacktivity", " VPN ", "Scopes", "Wildcard", "Reports", "Reports/scope", "Last 24h reports", "Last 7d reports", "Last 1m reports", "My reports", "HoF", "Credz"])
+    results = PrettyTable(field_names=["Pts", "Name", "Creation date", "Last update", "Last hacktivity", "VPN", "Scopes", "Wildcard", "Reports", "Reports/scope", "Last 24h reports", "Last 7d reports", "Last 1m reports", "My reports", "HoF", "Credz"])
     results.add_rows(data)
     results.align = "c"
     results.align["Name"] = "l"
