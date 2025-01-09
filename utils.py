@@ -185,7 +185,7 @@ def display(private_invitations):
 
             # Program vpn
             if program['vpn_active']:
-                vpn = green("✔️")
+                vpn = green("✔️ ")
                 points += 1
             else:
                 vpn = orange("X")
