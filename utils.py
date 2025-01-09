@@ -154,7 +154,16 @@ def display(private_invitations):
                 name = program['title'][0:NAME_LENGTH-3] + "..."    
 
             # Program scopes 
-            scopes = set([urlparse(scope['scope'] ).netloc for scope in pi['program']["scopes"]])
+            scopes = set()
+            for scope in pi['program']["scopes"]:
+                try:
+                    scopes.add(urlparse(scope['scope']).netloc)
+                except:
+                    if "|" in scope['scope']:
+                        for s in scope['scope'].split("|"):
+                            scopes.add(s)
+                    else:
+                        scopes.add(scope['scope'])
             
             if  len(scopes) <= SCOPE_COUNT_THRESHOLD_1:
                 points += 1
