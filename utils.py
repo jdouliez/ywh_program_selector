@@ -346,7 +346,7 @@ def display(private_invitations):
             
     data.sort(key=lambda x: x[0], reverse=True)
     
-    results = PrettyTable(field_names=["Pts", "Name", "Creation date", "Last update", "Last hacktivity", "VPN", "Scopes", "Wildcard", "Reports", "Reports/scope", "Last 24h reports", "Last 7d reports", "Last 1m reports", "My reports", "HoF", "Credz"])
+    results = PrettyTable(field_names=["Pts", "Name", "Creation date", "Last update", "Last hacktivity", " VPN ", "Scopes", "Wildcard", "Reports", "Reports/scope", "Last 24h reports", "Last 7d reports", "Last 1m reports", "My reports", "HoF", "Credz"])
     results.add_rows(data)
     results.align = "c"
     results.align["Name"] = "l"
