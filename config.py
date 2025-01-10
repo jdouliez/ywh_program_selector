@@ -1,3 +1,6 @@
+import tempfile
+import os
+
 YWH_USERNAME = "" # TO CHANGE
 YWH_BEARER = "" # TO CHANGE
 YWH_API = "https://api.yeswehack.com"
@@ -22,6 +25,6 @@ UPDATE_DATE_THRESHOLD_2 = 90
 LAST_HACKTIVITY_DATE_THRESHOLD_1 = 7
 LAST_HACKTIVITY_DATE_THRESHOLD_2 = 45
 
-YWH_PROGS_FILE = "/tmp/ywh_programs.json"
+YWH_PROGS_FILE = os.path.join(tempfile.gettempdir(), "ywh_programs.json")
 DATASOURCE_MAX_AGE = 2
 DATE_FORMAT = "%Y-%m-%d"

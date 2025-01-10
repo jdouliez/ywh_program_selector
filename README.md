@@ -13,7 +13,7 @@ pip install -r requirements.txt
 ```
 
 ### Config
-Update the variables in lines 1 & 2 inside config.py
+Update the variables in lines 4 & 5 inside config.py
 ```python
 YWH_USERNAME = "" # TO CHANGE
 YWH_BEARER = "" # TO CHANGE
