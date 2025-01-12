@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 import sys
 import time
@@ -11,7 +12,7 @@ from config import *
 
 
 def banner():
-    print(f"""
+    print(f"""\n
 dP    dP dP   dP   dP dP     dP      888888ba                                                                               dP                     dP                     
 Y8.  .8P 88   88   88 88     88      88    `8b                                                                              88                     88                     
  Y8aa8P  88  .8P  .8P 88aaaaa88a    a88aaaa8P' 88d888b. .d8888b. .d8888b. 88d888b. .d8888b. 88d8b.d8b.    .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P .d8888b. 88d888b. 
@@ -40,6 +41,78 @@ def get_date_from(timestamp):
 
 def fetch_all(path, session, resultsPerPage=25):
     return fetch_all_v2(path, session, resultsPerPage) if "v2/" in path else fetch_all_v1(path, session, resultsPerPage)
+
+def get_name(title):
+    return title.lower().replace("private bug bounty program", "").replace("bug bounty program", "").replace("private bugbounty", "").replace("bug bounty", "").replace("private program", "").strip().rstrip(' -').title()
+
+def convert_ids_to_slug(ids, private_invitations):
+    results = []
+    for id in ids:
+        name = id
+        for pi in private_invitations:
+            if pi['program']['pid'] == id:
+                name = get_name(pi['program']['title']) 
+        results.append(name)
+    return results
+
+def get_expanded_path(path):
+    # Expand ~ to full home directory path if path starts with ~
+    if path.startswith('~'):
+        path = os.path.expanduser(path)
+    return path
+
+def load_json_files(file_paths):
+    """Load and merge all JSON files into a single dictionary."""
+    all_data = {}
+    for file_path in file_paths:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            all_data.update(data)
+    return all_data
+
+def analyze_common_ids(data):
+    """Analyze which IDs are common across different numbers of users."""
+    # Count how many users have each ID
+    id_counts = defaultdict(set)
+    for username, ids in data.items():
+        for id_ in ids:
+            id_counts[id_].add(username)
+    
+    # Get total number of users
+    total_users = len(data)
+    
+    # Organize IDs by how many users have them
+    results = defaultdict(list)
+    for id_, users in id_counts.items():
+        results[len(users)].append({'id': id_,'users': list(users)})
+    return results, total_users
+
+def display_collaborations(results, total_users, private_invitations):
+    """Print the analysis results in a formatted way."""
+    
+    print(green(f"[>] Total number of hunters: {total_users}"))
+    data = defaultdict(list)
+    
+    for num_users in range(total_users, 1, -1):
+        ids = results.get(num_users, [])
+        print(green(f"[*] Possible collaborations for {num_users} hunters : {len(ids)}"))
+
+        for item in ids:
+            hunters = ', '.join(sorted(item['users']))
+            data[hunters].append(item['id'])
+
+    results = PrettyTable()
+    max_length = max(len(value) for _, value in data.items())
+
+    for key,value in data.items():
+        value.extend([""] * (max_length - len(value)))
+        results.add_column(orange(key.replace(", ", " & ")), convert_ids_to_slug(list(value), private_invitations))
+    
+    results.align = "c"
+    
+    print()
+    print(results)
+            
 
 def fetch_all_v1(path, session, resultsPerPage=25):
     all_items = []
@@ -137,7 +210,7 @@ def get_data_from_ywh(token):
         exit(1)
 
 
-def display(private_invitations):
+def display_programs_info(private_invitations, silent_mode):
     
     data = []
     print()
@@ -145,7 +218,7 @@ def display(private_invitations):
     for pi in private_invitations:
         points = 0
         
-        name = pi['program']['title'].lower().replace("private bug bounty program", "").replace("bug bounty program", "").replace("private bugbounty", "").replace("bug bounty", "").replace("private program", "").strip().rstrip(' -').title()
+        name = get_name(pi['program']['title'])
         
         if not pi['program']['disabled']:
             program = pi['program']
@@ -232,7 +305,6 @@ def display(private_invitations):
                 points += 1
                 total_reports_last7_days = red(total_reports_last7_days)
 
-
             # Report (in last month) count
             total_reports_current_month = program['stats']['total_reports_current_month']
             if total_reports_current_month <= TOTAL_REPORT_LAST1M_THRESHOLD_1:
@@ -245,7 +317,6 @@ def display(private_invitations):
                 points += 1
                 total_reports_current_month = red(total_reports_current_month)
 
-         
             # Hall of fame
             if len(program["ranking"]) == 0:
                 hof = "✖️"  
@@ -291,7 +362,6 @@ def display(private_invitations):
             if creation_date == last_update_date:
                 points += 1
 
-
             # Program hacktivities
             if len(program["hacktivities"]) > 0:
                 last_hacktivity_date = datetime.strptime(program["hacktivities"][0]["date"], "%Y-%m-%d")  
@@ -312,7 +382,6 @@ def display(private_invitations):
             else:
                 last_hacktivity_date  = "-"
 
-
             # Program submissions
             submissions = program['submissions'] if program['submissions'] > 0 else "-"
             points += program['submissions']
@@ -325,7 +394,6 @@ def display(private_invitations):
                 credz = orange("-")
                 points += 0
         
-
             data.append([   format_number(points),
                             name, 
                             creation_date,
@@ -343,7 +411,8 @@ def display(private_invitations):
                             hof,
                             credz])
         else:
-            print(f"[>] Program {name} is now disabled")
+            if not silent_mode:
+                print(f"[>] Program {name} is now disabled")
             
     data.sort(key=lambda x: x[0], reverse=True)
     
