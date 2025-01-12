@@ -1,8 +1,6 @@
 import tempfile
 import os
 
-YWH_USERNAME = "" # TO CHANGE
-YWH_BEARER = "" # TO CHANGE
 YWH_API = "https://api.yeswehack.com"
 
 NAME_LENGTH = 40

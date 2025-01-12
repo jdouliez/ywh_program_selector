@@ -5,32 +5,30 @@ This script retrieves your YesWeHack private programs and reports then it sorts 
 
 Feel free to customize all the config values to make the results meet your needs.
 
+You can also compare your programs with other hunters to find good collaborations!
+
 ## Usage
 
 ### Setup
 ```bash
-pip install -r requirements.txt
+$> pip install -r requirements.txt
 ```
-
-### Config
-Update the variables in lines 4 & 5 inside config.py
-```python
-YWH_USERNAME = "" # TO CHANGE
-YWH_BEARER = "" # TO CHANGE
-```
-
-`YWH_USERNAME` is your YesWeHack username.  
-`YWH_BEARER` is your YesWeHack authorization bearer.
 
 ### Run
 
+**Export your private program info into a nice table**  
 ```bash
-python main.py
+$> python ywh_program_selector.py --token <YWH_TOKEN>
 ```
 
 ![Tool results](./doc/results.png)
 
+**Export your private program collaboration ids**  
+```bash
+$> python ywh_program_selector.py --token <YWH_TOKEN> --collab-export-ids | tee user-ids.json
+```
+
 ## TODO
 * Use multithreading to speed up the data fetching ?
 * Implement a login/password/otp authentication ?
-* Extract all points values in config to allow fine tuning
+<!-- * Extract all points values in config to allow fine tuning -->

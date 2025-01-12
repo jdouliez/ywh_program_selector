@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 import requests
 from tqdm import tqdm
@@ -20,7 +21,7 @@ Y8.  .8P 88   88   88 88     88      88    `8b                                  
                                                                       .88                                                                                                 
                                                                   d8888P                                                                                                  
                                                                                     {Fore.CYAN}@_Ali4s_{Style.RESET_ALL}                                   
-""")
+""", file=sys.stderr)
 
 def format_number(number):
     return f"{number:.0f}" if number == int(number) else f"{number:.1f}"
@@ -78,10 +79,10 @@ def fetch_all_v2(path, session, resultsPerPage=25):
     
     return all_items
 
-def get_data_from_ywh():
+def get_data_from_ywh(token):
 
     session = requests.Session()
-    session.headers = {"Authorization": f"Bearer {YWH_BEARER}"}
+    session.headers = {"Authorization": f"Bearer {token}"}
 
     print(f"[>] Datasource file : {YWH_PROGS_FILE}...")
 
