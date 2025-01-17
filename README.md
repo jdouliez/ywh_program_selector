@@ -21,40 +21,57 @@ Additionally, the tool enables program comparison with other hunters, facilitati
 $> pip install -r requirements.txt
 ```
 
-### Usage
+### Options
 
 ```bash
-usage: ywh_program_selector.py [-h] --token TOKEN [--silent] [--collab-export-ids | --collaborations] [--ids-files IDS_FILES]
+usage: ywh_program_selector.py [-h] --token TOKEN [--silent] (--show | --collab-export-ids | --collaborations | --get-progs | --extract-scopes) [--ids-files IDS_FILES]
 
 Retrieve all your YesWeHack private info in one place.
 
 options:
-  -h, --help               Show this help message and exit
-  --token TOKEN            The YesWeHack authorization bearer
-  --silent                 Do not print banner
-  --collab-export-ids      Export all program collaboration ids
-  --collaborations         Get common programs with other hunters
-  --ids-files IDS_FILES    Comma separated list of paths to other hunter IDs. Ex. user1.json,user2.json
-
+  -h, --help                Show this help message and exit
+  --token TOKEN             The YesWeHack authorization bearer
+  --silent                  Do not print banner
+  --show                    Display all programs info
+  --collab-export-ids       Export all programs collaboration ids
+  --collaborations          Show collaboration programs with other hunters
+  --get-progs               Displays programs simple list with slugs
+  --extract-scopes          Extract program scopes
+  --ids-files IDS_FILES     Comma separated list of paths to other hunter IDs. Ex. user1.json,user2.json
 ```
 
-#### Export your private program info into a nice table
+<u>**Export your private program info into a nice table**</u>
 ```bash
-$> python ywh_program_selector.py --token <YWH_TOKEN>
+$> python ywh_program_selector.py --token <YWH_TOKEN> --show
 ```
 
 ![Tool results](./doc/results.png)
 
-#### Export your private program collaboration ids
+<u>**Export your private program collaboration ids**</u>
 ```bash
 $> python ywh_program_selector.py --token <YWH_TOKEN> --collab-export-ids > my-ids.json
 ```
 
-#### Check your private programs in common with others hunters
+<u>**Check your private programs in common with others hunters**</u>
 ```bash
 $> python ywh_program_selector.py --token <YWH_TOKEN> --collaborations --ids-files "my-ids.json, hunter1-ids.json, hunter2-ids.json"
 ```
 ![Collaboration feature](./doc/collaborations.png)
+
+<u>**Display programs list with slugs**</u>
+```bash
+$> python ywh_program_selector.py --token <YWH_TOKEN> --get-progs
+```
+
+<u>**Extract your private scopes into files**</u>
+```bash
+$> python ywh_program_selector.py --token <YWH_TOKEN> --extract-scopes
+```
+
+<u>**Extract your private scopes into files for one program**</u>
+```bash
+$> python ywh_program_selector.py --token <YWH_TOKEN> --extract-scopes --program <PROG_SLUG>
+```
 
 ## TODO
 * Use multithreading to speed up the data fetching ?

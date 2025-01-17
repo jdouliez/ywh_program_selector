@@ -1,4 +1,5 @@
 from collections import defaultdict
+import ipaddress
 import json
 import sys
 import time
@@ -9,7 +10,8 @@ from colorama import Fore, Style
 from urllib.parse import urlparse
 from datetime import datetime
 from config import *
-
+from urllib.parse import urlparse
+import re
 
 def banner():
     print(f"""\n
@@ -45,6 +47,40 @@ def fetch_all(path, session, resultsPerPage=25):
 def get_name(title):
     return title.lower().replace("private bug bounty program", "").replace("bug bounty program", "").replace("private bugbounty", "").replace("bug bounty", "").replace("private program", "").strip().rstrip(' -').title()
 
+def is_ip(ip_string):
+    try:
+        ipaddress.ip_address(ip_string)
+        return True
+    except ValueError:
+        return False
+
+
+def get_ips_from_subnet(subnet_string):
+    try:
+        # Check if it's a range notation (contains '-')
+        if '-' in subnet_string:
+            base_ip, range_end = subnet_string.rsplit('.', 1)
+            start, end = range_end.split('-')
+            
+            # Convert range to integers
+            start_num = int(start)
+            end_num = int(end)
+            
+            if not (0 <= start_num <= 255 and 0 <= end_num <= 255):
+                raise ValueError("IP range must be between 0 and 255")
+                
+            # Generate IPs in the range
+            return {f"{base_ip}.{i}" for i in range(start_num, end_num + 1)}
+            
+        # Handle CIDR notation
+        else:
+            network = ipaddress.ip_network(subnet_string, strict=False)
+            return {str(ip) for ip in network.hosts()}
+            
+    except ValueError as e:
+        return set()  # Return empty set on invalid input
+    
+
 def convert_ids_to_slug(ids, private_invitations):
     results = []
     for id in ids:
@@ -61,6 +97,57 @@ def get_expanded_path(path):
         path = os.path.expanduser(path)
     return path
 
+def is_valid_domain(url_string):
+    # Add scheme if not present for urlparse
+    if not url_string.startswith(('http://', 'https://')):
+        url_string = 'https://' + url_string
+    
+    try:
+        # Parse the URL
+        parsed = urlparse(url_string)
+        
+        # Domain validation
+        domain = parsed.netloc
+        if not domain:
+            return False
+            
+        # Basic domain format validation
+        domain_pattern = r'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$'
+        if not re.match(domain_pattern, domain, re.IGNORECASE):
+            return False
+            
+        # Check domain parts
+        parts = domain.split('.')
+        if len(parts) < 2:  # Must have at least two parts (example.com)
+            return False
+            
+        # Validate each domain part
+        for part in parts:
+            # Check length
+            if len(part) > 63 or len(part) == 0:
+                return False
+            # Check for invalid characters
+            if not all(c.isalnum() or c == '-' for c in part):
+                return False
+            # Check start/end characters
+            if part.startswith('-') or part.endswith('-'):
+                return False
+                
+        # Path validation (if exists)
+        path = parsed.path
+        if path:
+            # Remove leading slash for empty paths
+            if path == '/':
+                path = ''
+            # Check for invalid characters in path
+            if not all(c.isalnum() or c in '-_.~/?' for c in path):
+                return False
+                
+        return True
+        
+    except Exception:
+        return False
+    
 def load_json_files(file_paths):
     """Load and merge all JSON files into a single dictionary."""
     all_data = {}
@@ -208,6 +295,30 @@ def get_data_from_ywh(token):
     else:
         print(red("[!] Data not reachable. Error"))
         exit(1)
+
+
+def display_programs_list(private_invitations, silent_mode):
+    data = []
+    print()
+
+    for pi in private_invitations:
+        name = get_name(pi['program']['title'])
+        
+        if not pi['program']['disabled']:
+            program = pi['program']
+            name = get_name(program['title'])[0:60]
+            slug = program['slug'][0:60]
+            data.append([f'{name}', f'{slug}'])
+        else:
+            if not silent_mode:
+                print(f"[>] Program {name} is now disabled")
+            
+    results = PrettyTable(field_names=["Name", "Slug"])
+    results.add_rows(data)
+    results.align = "l"
+    
+    print("\n")
+    print(results)
 
 
 def display_programs_info(private_invitations, silent_mode):
@@ -424,3 +535,65 @@ def display_programs_info(private_invitations, silent_mode):
     print("\n\n")
     print(results)
 
+
+def display_programs_scopes(private_invitations, program_slug, silent_mode):
+    print()
+    
+    scope_web = set()
+    scope_wildcard = set()
+    scope_mobile = set()
+    scope_ip = set()
+    scope_misc = set()
+
+    for pi in private_invitations:
+        if not pi['program']['disabled']:
+            if program_slug == "ALL" or program_slug.lower() == pi['program']['slug'].lower():
+                for scope in pi['program']["scopes"]:
+
+                    scope = scope['scope'].rstrip("/*")
+
+                    if scope.startswith("*."):
+                        scope_wildcard.add(scope)
+                    elif "apps.apple.com" in scope or "play.google.com" in scope or ".apk" in scope or ".ipa" in scope:
+                        scope_mobile.add(scope)
+                    elif scope.startswith("http"):
+                        scope_web.add(scope)
+                    elif is_ip(scope):
+                        scope_ip.add(scope)
+                    elif is_valid_domain(scope):
+                        scope_web.add(f"https://{scope}")
+                    elif "-" in scope or "/" in scope:
+                        for s in get_ips_from_subnet(scope):
+                            scope_ip.add(s)
+                    elif "|" in scope:
+                        for s in scope.split("|"):
+                            scope_misc.add(s)
+                    elif "." not in scope:
+                        pass
+                    else:
+                        scope_misc.add(scope)
+        else:
+            if not silent_mode:
+                print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")
+    
+    print(green("\n\n[*] All scopes extracted : "))
+
+    print(orange(f" * Web scope : {len(scope_web)}"))
+    with open("scope_web.txt", "w") as f:
+        f.write("\n".join(scope_web)) 
+
+    print(orange(f" * Wildcards scope : {len(scope_wildcard)}"))
+    with open("scope_wildcard.txt", "w") as f:
+        f.write("\n".join(scope_wildcard)) 
+
+    print(orange(f" * IPs scope : {len(scope_ip)}"))
+    with open("scope_ip.txt", "w") as f:
+        f.write("\n".join(scope_ip))
+
+    print(orange(f" * Mobile scope : {len(scope_mobile)}"))
+    with open("scope_mobile.txt", "w") as f:
+        f.write("\n".join(scope_mobile))
+
+    print(orange(f" * Misc scope : {len(scope_misc)}"))
+    with open("scope_misc.txt", "w") as f:
+        f.write("\n".join(scope_misc))
