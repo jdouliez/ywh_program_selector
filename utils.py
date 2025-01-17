@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 import re
 
 def banner():
-    print(f"""\n
+    print(orange(f"""\n
 dP    dP dP   dP   dP dP     dP      888888ba                                                                               dP                     dP                     
 Y8.  .8P 88   88   88 88     88      88    `8b                                                                              88                     88                     
  Y8aa8P  88  .8P  .8P 88aaaaa88a    a88aaaa8P' 88d888b. .d8888b. .d8888b. 88d888b. .d8888b. 88d8b.d8b.    .d8888b. .d8888b. 88 .d8888b. .d8888b. d8888P .d8888b. 88d888b. 
@@ -24,7 +24,7 @@ Y8.  .8P 88   88   88 88     88      88    `8b                                  
                                                                       .88                                                                                                 
                                                                   d8888P                                                                                                  
                                                                                     {Fore.CYAN}@_Ali4s_{Style.RESET_ALL}                                   
-""", file=sys.stderr)
+"""), file=sys.stderr)
 
 def format_number(number):
     return f"{number:.0f}" if number == int(number) else f"{number:.1f}"
@@ -54,7 +54,6 @@ def is_ip(ip_string):
     except ValueError:
         return False
 
-
 def get_ips_from_subnet(subnet_string):
     try:
         # Check if it's a range notation (contains '-')
@@ -62,7 +61,6 @@ def get_ips_from_subnet(subnet_string):
             base_ip, range_end = subnet_string.rsplit('.', 1)
             start, end = range_end.split('-')
             
-            # Convert range to integers
             start_num = int(start)
             end_num = int(end)
             
@@ -79,7 +77,6 @@ def get_ips_from_subnet(subnet_string):
             
     except ValueError as e:
         return set()  # Return empty set on invalid input
-    
 
 def convert_ids_to_slug(ids, private_invitations):
     results = []
@@ -244,15 +241,15 @@ def get_data_from_ywh(token):
     session = requests.Session()
     session.headers = {"Authorization": f"Bearer {token}"}
 
-    print(f"[>] Datasource file : {YWH_PROGS_FILE}...")
+    print(f"[*] Datasource file : {YWH_PROGS_FILE}...")
 
     res = session.get(f"{YWH_API}/user/members")
     if res.status_code == 200:
         private_invitations = [prog for prog in res.json()["items"] if "ROLE_PROGRAM_HUNTER" in prog['roles']]
-        print(f"[>] Got {len(private_invitations)} private programs... ")
+        print(green(f"[+] Got {len(private_invitations)} private programs... "))
 
         reports = fetch_all(f"v2/hunter/reports", session, resultsPerPage=50)
-        print(f"[>] Got {len(reports)} reports... ")
+        print(green(f"[+] Got {len(reports)} reports... "))
 
         print(f"[>] Gathering info about programs")
         for pi in tqdm(private_invitations):

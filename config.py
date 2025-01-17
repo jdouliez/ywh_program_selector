@@ -1,3 +1,4 @@
+from pathlib import Path
 import tempfile
 import os
 
@@ -24,5 +25,8 @@ LAST_HACKTIVITY_DATE_THRESHOLD_1 = 7
 LAST_HACKTIVITY_DATE_THRESHOLD_2 = 45
 
 YWH_PROGS_FILE = os.path.join(tempfile.gettempdir(), "ywh_programs.json")
+YWH_LOCAL_CONFIG = Path(os.path.join(Path.home(), '.config', 'ywh_program_selector'))
+YWH_LOCAL_CONFIG_CREDZ = Path(os.path.join(YWH_LOCAL_CONFIG, "credentials"))
+
 DATASOURCE_MAX_AGE = 2
 DATE_FORMAT = "%Y-%m-%d"
