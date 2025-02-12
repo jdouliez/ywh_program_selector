@@ -1,4 +1,5 @@
 from collections import defaultdict
+from unidecode import unidecode
 import ipaddress
 import json
 import sys
@@ -28,7 +29,7 @@ Y8.  .8P 88   88   88 88     88      88    `8b                                  
 
 def format_number(number):
     return f"{number:.0f}" if number == int(number) else f"{number:.1f}"
-     
+
 def red(input):
     return Fore.RED + str(input) + Style.RESET_ALL
 
@@ -60,21 +61,21 @@ def get_ips_from_subnet(subnet_string):
         if '-' in subnet_string:
             base_ip, range_end = subnet_string.rsplit('.', 1)
             start, end = range_end.split('-')
-            
+
             start_num = int(start)
             end_num = int(end)
-            
+
             if not (0 <= start_num <= 255 and 0 <= end_num <= 255):
                 raise ValueError("IP range must be between 0 and 255")
-                
+
             # Generate IPs in the range
             return {f"{base_ip}.{i}" for i in range(start_num, end_num + 1)}
-            
+
         # Handle CIDR notation
         else:
             network = ipaddress.ip_network(subnet_string, strict=False)
             return {str(ip) for ip in network.hosts()}
-            
+
     except ValueError as e:
         return set()  # Return empty set on invalid input
 
@@ -84,7 +85,7 @@ def convert_ids_to_slug(ids, private_invitations):
         name = id
         for pi in private_invitations:
             if pi['program']['pid'] == id:
-                name = get_name(pi['program']['title']) 
+                name = get_name(pi['program']['title'])
         results.append(name)
     return results
 
@@ -98,26 +99,26 @@ def is_valid_domain(url_string):
     # Add scheme if not present for urlparse
     if not url_string.startswith(('http://', 'https://')):
         url_string = 'https://' + url_string
-    
+
     try:
         # Parse the URL
         parsed = urlparse(url_string)
-        
+
         # Domain validation
         domain = parsed.netloc
         if not domain:
             return False
-            
+
         # Basic domain format validation
         domain_pattern = r'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$'
         if not re.match(domain_pattern, domain, re.IGNORECASE):
             return False
-            
+
         # Check domain parts
         parts = domain.split('.')
         if len(parts) < 2:  # Must have at least two parts (example.com)
             return False
-            
+
         # Validate each domain part
         for part in parts:
             # Check length
@@ -129,7 +130,7 @@ def is_valid_domain(url_string):
             # Check start/end characters
             if part.startswith('-') or part.endswith('-'):
                 return False
-                
+
         # Path validation (if exists)
         path = parsed.path
         if path:
@@ -139,12 +140,12 @@ def is_valid_domain(url_string):
             # Check for invalid characters in path
             if not all(c.isalnum() or c in '-_.~/?' for c in path):
                 return False
-                
+
         return True
-        
+
     except Exception:
         return False
-    
+
 def load_json_files(file_paths):
     """Load and merge all JSON files into a single dictionary."""
     all_data = {}
@@ -161,10 +162,10 @@ def analyze_common_ids(data):
     for username, ids in data.items():
         for id_ in ids:
             id_counts[id_].add(username)
-    
+
     # Get total number of users
     total_users = len(data)
-    
+
     # Organize IDs by how many users have them
     results = defaultdict(list)
     for id_, users in id_counts.items():
@@ -173,10 +174,10 @@ def analyze_common_ids(data):
 
 def display_collaborations(results, total_users, private_invitations):
     """Print the analysis results in a formatted way."""
-    
+
     print(green(f"[>] Total number of hunters: {total_users}"))
     data = defaultdict(list)
-    
+
     for num_users in range(total_users, 1, -1):
         ids = results.get(num_users, [])
         print(green(f"[*] Possible collaborations for {num_users} hunters : {len(ids)}"))
@@ -191,41 +192,41 @@ def display_collaborations(results, total_users, private_invitations):
     for key,value in data.items():
         value.extend([""] * (max_length - len(value)))
         results.add_column(orange(key.replace(", ", " & ")), convert_ids_to_slug(list(value), private_invitations))
-    
+
     results.align = "c"
-    
+
     print()
     print(results)
-            
+
 
 def fetch_all_v1(path, session, resultsPerPage=25):
     all_items = []
     page = 0
-    
+
     while True:
         res = session.get(f"{YWH_API}/{path}?resultsPerPage={resultsPerPage}&page={page}")
         if res.status_code != 200:
             break
-            
+
         data = res.json()
         all_items.extend(data['items'])
 
         if "pagination" not in data or page + 1 >= data["pagination"]['nb_pages']:
             break
-            
+
         page += 1
-    
+
     return all_items
 
 def fetch_all_v2(path, session, resultsPerPage=25):
     all_items = []
     page = 1
-    
+
     while True:
         res = session.get(f"{YWH_API}/{path}?resultsPerPage={resultsPerPage}&page={page}")
         if res.status_code != 200:
             break
-            
+
         data = res.json()
         all_items.extend(data['items'])
 
@@ -547,10 +548,26 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
             if program_slug == "ALL" or program_slug.lower() == pi['program']['slug'].lower():
                 for scope in pi['program']["scopes"]:
 
-                    scope = scope['scope'].rstrip("/*")
+                    scope = unidecode(scope['scope']).split()[0].rstrip("/*")
 
-                    if scope.startswith("*."):
-                        scope_wildcard.add(scope)
+                    if scope.replace("https://","").startswith("*."):
+                        if "|" in scope and "(" in scope and ")" in scope:
+                            match = re.search(r'\((.*?)\)\.?(.*)|(.+?)\((.*?)\)', scope.replace("https://","").replace("*.",""))
+                            if match.group(1):  # Extensions are ate the start of the string
+                                extensions = match.group(1).split('|')
+                                base_domain = match.group(2)
+                                domains = [f"{ext}.{base_domain}" for ext in extensions]
+                            else:  # Extensions are at the end of the string
+                                base_domain = match.group(3)
+                                extensions = match.group(4).split('|')
+                                domains = [f"{base_domain}{ext.strip()}" for ext in extensions]
+                        else:
+                            domains = [scope]
+
+                        for s in domains:
+                            scope_wildcard.add(s.replace("https://","").replace("*.",""))
+                    elif "*" in scope:
+                        scope_misc.add(scope)
                     elif "apps.apple.com" in scope or "play.google.com" in scope or ".apk" in scope or ".ipa" in scope:
                         scope_mobile.add(scope)
                     elif scope.startswith("http"):
@@ -562,9 +579,20 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
                     elif "-" in scope or "/" in scope:
                         for s in get_ips_from_subnet(scope):
                             scope_ip.add(s)
-                    elif "|" in scope:
-                        for s in scope.split("|"):
-                            scope_misc.add(s)
+                    elif "|" in scope and "(" in scope and ")" in scope:
+                        match = re.search(r'\((.*?)\)\.?(.*)|(.+?)\((.*?)\)', scope)
+
+                        if match.group(1):  # Extensions are ate the start of the string
+                            extensions = match.group(1).split('|')
+                            base_domain = match.group(2)
+                            domains = [f"{ext}.{base_domain}" for ext in extensions]
+                        else:  # Extensions are at the end of the string
+                            base_domain = match.group(3)
+                            extensions = match.group(4).split('|')
+                            domains = [f"{base_domain}{ext.strip()}" for ext in extensions]
+
+                        for s in domains:
+                            scope_web.add(f"https://{scope}") #FIXME : Here we assume this is a web content (over TLS) scope without testing it before  ¯\_(ツ)_/¯
                     elif "." not in scope:
                         pass
                     else:
@@ -572,7 +600,7 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
         else:
             if not silent_mode:
                 print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")
-    
+
     print(green("\n\n[*] All scopes extracted : "))
 
     print(orange(f" * Web scope : {len(scope_web)}"))

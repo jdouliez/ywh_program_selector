@@ -3,3 +3,4 @@ tqdm
 prettytable
 colorama
 pyotp
+unidecode

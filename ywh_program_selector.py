@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 print(orange("[>] Local datasource is outdated. Fetching fresh data"))
                 private_invitations = get_data_from_ywh(token)
             else:
-                print(red("[>] Local datasource is outdated but no authentication provided. Skipping refresh"))                            
+                print(red("[>] Local datasource is outdated but no authentication provided. Skipping refresh"))
         else:
             with open(YWH_PROGS_FILE, 'r') as file:
                 private_invitations = json.load(file)
@@ -75,15 +75,15 @@ if __name__ == "__main__":
     # Export all programs collaboration ids
     if args.collab_export_ids:
         print(json.dumps({f"{private_invitations[0]['user']['username']}": [pi['program']['pid'] for pi in private_invitations if pi['program']['pid']]}))
-    
+
     # Show collaboration programs with other hunters
     elif args.collaborations:
 
-        if not args.ids_files: 
+        if not args.ids_files:
             print(orange(f"[>] Please, provide other hunters collaboration ids list with option --ids-files \"./user-1.json, /tmp/user2.json\""))
             parser.print_usage()
             exit(1)
-        
+
         paths = [path.strip() for path in args.ids_files.split(",")]
 
         existing_files = [get_expanded_path(path.strip()) for path in args.ids_files.split(",") if os.path.exists(get_expanded_path(path.strip()))]
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         if len(existing_files) == 0:
             print(red("[!] No collaboration ids file path provided"))
             exit(1)
-                
+
         if len(existing_files) == 1:
             print(red("[!] Ids from at least 2 hunters are mandatory"))
             exit(1)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         try:
             data = load_json_files(existing_files)
             results, total_users = analyze_common_ids(data)
-            display_collaborations(results, total_users, private_invitations)            
+            display_collaborations(results, total_users, private_invitations)
         except json.JSONDecodeError as e:
             print(red(f"Error: Invalid JSON in one of the files: {e}"))
             exit(1)
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # Displays programs simple list with slugs
     elif args.get_progs:
         display_programs_list(private_invitations, args.silent)
-    
+
     # Extract program scopes
     elif args.extract_scopes:
         program = args.program if args.program else "ALL"
