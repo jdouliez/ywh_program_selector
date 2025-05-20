@@ -110,9 +110,12 @@ def is_valid_domain(url_string):
             return False
 
         # Basic domain format validation
-        domain_pattern = r'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$'
+        domain_pattern = r'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}[:\d]*$'
         if not re.match(domain_pattern, domain, re.IGNORECASE):
             return False
+
+        # Remove port
+        domain = domain.split(":")[0]
 
         # Check domain parts
         parts = domain.split('.')
@@ -548,12 +551,12 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
             if program_slug == "ALL" or program_slug.lower() == pi['program']['slug'].lower():
                 for scope in pi['program']["scopes"]:
 
-                    scope = unidecode(scope['scope']).split()[0].rstrip("/*")
+                    scope = unidecode(scope['scope']).split()[0].rstrip("/*").replace(":443","")
 
                     if scope.replace("https://","").startswith("*."):
                         if "|" in scope and "(" in scope and ")" in scope:
                             match = re.search(r'\((.*?)\)\.?(.*)|(.+?)\((.*?)\)', scope.replace("https://","").replace("*.",""))
-                            if match.group(1):  # Extensions are ate the start of the string
+                            if match.group(1):  # Extensions are at the start of the string
                                 extensions = match.group(1).split('|')
                                 base_domain = match.group(2)
                                 domains = [f"{ext}.{base_domain}" for ext in extensions]
@@ -570,13 +573,9 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
                         scope_misc.add(scope)
                     elif "apps.apple.com" in scope or "play.google.com" in scope or ".apk" in scope or ".ipa" in scope:
                         scope_mobile.add(scope)
-                    elif scope.startswith("http"):
-                        scope_web.add(scope)
                     elif is_ip(scope):
                         scope_ip.add(scope)
-                    elif is_valid_domain(scope):
-                        scope_web.add(f"https://{scope}")
-                    elif "-" in scope or "/" in scope:
+                    elif "-" in scope or ("/" in scope and re.search(r'\/\d{1,2}$', scope)):
                         for s in get_ips_from_subnet(scope):
                             scope_ip.add(s)
                     elif "|" in scope and "(" in scope and ")" in scope:
@@ -591,8 +590,35 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
                             extensions = match.group(4).split('|')
                             domains = [f"{base_domain}{ext.strip()}" for ext in extensions]
 
-                        for s in domains:
-                            scope_web.add(f"https://{scope}") #FIXME : Here we assume this is a web content (over TLS) scope without testing it before  ¯\_(ツ)_/¯
+                        for scope in domains:
+                            scope_web.add(scope if scope.startswith("http") else f"https://{scope}")
+                    elif "|" in scope and "{" in scope and "}" in scope:
+                         match = re.search(r'(.*)\{(.*?)\}(.*)', scope)
+                         if not match:
+                             scope_misc.add(scope)
+                         else:
+                             base_prefix = match.group(1) if match.group(1).endswith(".") else f"{match.group(1)}."  # Part before the curly braces
+                             variations = match.group(2).split('|')  # The variations inside curly braces
+                             base_suffix = match.group(3)  # Part after the curly braces
+
+                             domains = [f"{base_prefix}{variation}{base_suffix}" for variation in variations]
+
+                             for s in domains:
+                                 scope_web.add(s)
+                    elif "|" in scope and "[" in scope and "]" in scope:
+                         match = re.search(r'(.*)\[(.*?)\](.*)', scope)
+                         if not match:
+                             scope_misc.add(scope)
+                         else:
+                             base_prefix = match.group(1) if match.group(1).endswith(".") else f"{match.group(1)}."  # P>
+                             variations = match.group(2).split('|')  # The variations inside curly braces
+                             base_suffix = match.group(3)  # Part after the curly braces
+                             domains = [f"{base_prefix}{variation}{base_suffix}" for variation in variations]
+                             for s in domains:
+                                 scope_web.add(s)
+
+                    elif is_valid_domain(scope):
+                        scope_web.add(scope if scope.startswith("http") else f"https://{scope}")
                     elif "." not in scope:
                         pass
                     else:
