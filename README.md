@@ -1,5 +1,5 @@
 
-![Logo](doc/banner.png)
+![Logo](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/banner.png))
 
 <p align="center">    
     YWH Programs Selector is a CLI tool to filter bug bounty programs from platforms like YesWeHack.  
@@ -81,7 +81,7 @@ options:
   ```bash
   $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --show 
   ```
-  ![Tool results](./doc/results.png)
+  ![Tool results](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/results.png)
 
 - **Export your collaboration IDs**: 
   ```bash
@@ -91,7 +91,7 @@ options:
   ```bash
   $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --find-collaborations --ids-files "my-ids.json, hunter1-ids.json"
   ```
-  ![Collaboration feature](./doc/collaborations.png)
+  ![Collaboration feature](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/collaborations.png)
 
 - **Extract all scopes**: 
   ```bash
