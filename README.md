@@ -3,12 +3,9 @@
 
 <p align="center">    
     YWH Programs Selector is a CLI tool to filter bug bounty programs from platforms like YesWeHack.  
-    It analyzes your YesWeHack private programs and reports, prioritizing them to identify optimal targets for your next hunt. It supports program comparison with other hunters and scope extraction for payload spraying.
-
-    <br>
+    It analyzes your YesWeHack private programs and reports, prioritizing them to identify optimal targets for your next hunt. It supports program comparison with other hunters and scope extraction for payload spraying.<br/><br/>
     <a href="https://twitter.com/intent/follow?screen_name=_Ali4s_" title="Follow"><img src="https://img.shields.io/twitter/follow/_Ali4s__?label=_Ali4s_&style=social"></a>
-    <a href="https://www.linkedin.com/in/jordan-douliez/" title="Connect on LinkedIn"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue?style=social&logo=linkedin" alt="LinkedIn Badge"></a>
-    <br>
+<a href="https://www.linkedin.com/in/jordan-douliez/" title="Connect on LinkedIn"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue?style=social&logo=linkedin" alt="LinkedIn Badge"></a>
 </p>
 
 ## Description
