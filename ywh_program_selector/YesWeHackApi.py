@@ -1,7 +1,7 @@
 from logging import Logger, getLogger
 import requests, pyotp, datetime, time
-from config import YWH_API
-from utils import green
+from .config import YWH_API
+from .utils import green
 
 logger: Logger = getLogger(__name__)    
  
@@ -26,15 +26,15 @@ class YesWeHackApi:
         self.password = credentials['password']
         self.otp_key = credentials['otp_key']      
  
+
     def _get_otp(self):
         totp = pyotp.TOTP(self.otp_key)
         return totp.now()
  
+
     def login_totp(self):
-    
         r_login = self.sess.post(f"{self.host}/login", json={"email": self.username, "password": self.password})
         if r_login.status_code != 200:
-            print(r_login.status_code)
             raise Exception("Login with username/password error")
             
         print(green("[*] Auth with login/password successful"))
@@ -46,6 +46,7 @@ class YesWeHackApi:
                 logger.warn("Waiting new token")
                 time.sleep(10)
                 login_otp = self.sess.post(f"{self.host}/account/totp", json={"code": self._get_otp(), "token": login.get("totp_token")}).json()
+ 
  
         print(green("[*] Auth with OTP successful"))
         self.token = login_otp.get("token")

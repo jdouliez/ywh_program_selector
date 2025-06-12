@@ -1,9 +1,10 @@
 import os
 import json
 from getpass import getpass
-from YesWeHackApi import YesWeHackApi
-from config import YWH_LOCAL_CONFIG, YWH_LOCAL_CONFIG_CREDZ
-from utils import red
+from .YesWeHackApi import YesWeHackApi
+from .config import YWH_LOCAL_CONFIG, YWH_LOCAL_CONFIG_CREDZ
+from .utils import red
+
 
 def get_credentials():
     
@@ -37,12 +38,6 @@ def get_credentials():
             return None
 
     return credentials
-
-
-def get_totp(totp_secret):
-    import pyotp
-    totp = pyotp.TOTP(totp_secret)
-    return totp.now()
 
 
 def get_token_from_credential():

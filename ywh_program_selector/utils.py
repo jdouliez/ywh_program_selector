@@ -1,18 +1,18 @@
-from collections import defaultdict
-from unidecode import unidecode
 import ipaddress
 import json
+import re
 import sys
 import time
 import requests
-from tqdm import tqdm
-from prettytable import PrettyTable
-from colorama import Fore, Style
-from urllib.parse import urlparse
+from collections import defaultdict
 from datetime import datetime
-from config import *
 from urllib.parse import urlparse
-import re
+from colorama import Fore, Style
+from tqdm import tqdm
+from unidecode import unidecode
+
+from .config import *
+
 
 def banner():
     print(orange(f"""\n
@@ -27,26 +27,34 @@ Y8.  .8P 88   88   88 88     88      88    `8b                                  
                                                                                     {Fore.CYAN}@_Ali4s_{Style.RESET_ALL}                                   
 """), file=sys.stderr)
 
+
 def format_number(number):
     return f"{number:.0f}" if number == int(number) else f"{number:.1f}"
+
 
 def red(input):
     return Fore.RED + str(input) + Style.RESET_ALL
 
+
 def orange(input):
     return Fore.YELLOW + str(input) + Style.RESET_ALL
+
 
 def green(input):
     return Fore.GREEN + str(input) + Style.RESET_ALL
 
+
 def get_date_from(timestamp):
     return (time.time() - timestamp) / (24 * 3600)
+
 
 def fetch_all(path, session, resultsPerPage=25):
     return fetch_all_v2(path, session, resultsPerPage) if "v2/" in path else fetch_all_v1(path, session, resultsPerPage)
 
+
 def get_name(title):
     return title.lower().replace("private bug bounty program", "").replace("bug bounty program", "").replace("private bugbounty", "").replace("bug bounty", "").replace("private program", "").strip().rstrip(' -').title()
+
 
 def is_ip(ip_string):
     try:
@@ -54,6 +62,7 @@ def is_ip(ip_string):
         return True
     except ValueError:
         return False
+
 
 def get_ips_from_subnet(subnet_string):
     try:
@@ -79,6 +88,7 @@ def get_ips_from_subnet(subnet_string):
     except ValueError as e:
         return set()  # Return empty set on invalid input
 
+
 def convert_ids_to_slug(ids, private_invitations):
     results = []
     for id in ids:
@@ -89,11 +99,13 @@ def convert_ids_to_slug(ids, private_invitations):
         results.append(name)
     return results
 
+
 def get_expanded_path(path):
     # Expand ~ to full home directory path if path starts with ~
     if path.startswith('~'):
         path = os.path.expanduser(path)
     return path
+
 
 def is_valid_domain(url_string):
     # Add scheme if not present for urlparse
@@ -149,6 +161,7 @@ def is_valid_domain(url_string):
     except Exception:
         return False
 
+
 def load_json_files(file_paths):
     """Load and merge all JSON files into a single dictionary."""
     all_data = {}
@@ -157,6 +170,7 @@ def load_json_files(file_paths):
             data = json.load(f)
             all_data.update(data)
     return all_data
+
 
 def analyze_common_ids(data):
     """Analyze which IDs are common across different numbers of users."""
@@ -174,6 +188,7 @@ def analyze_common_ids(data):
     for id_, users in id_counts.items():
         results[len(users)].append({'id': id_,'users': list(users)})
     return results, total_users
+
 
 def display_collaborations(results, total_users, private_invitations):
     """Print the analysis results in a formatted way."""
@@ -221,6 +236,7 @@ def fetch_all_v1(path, session, resultsPerPage=25):
 
     return all_items
 
+
 def fetch_all_v2(path, session, resultsPerPage=25):
     all_items = []
     page = 1
@@ -239,6 +255,7 @@ def fetch_all_v2(path, session, resultsPerPage=25):
         page += 1
     
     return all_items
+
 
 def get_data_from_ywh(token):
 
@@ -298,9 +315,8 @@ def get_data_from_ywh(token):
         exit(1)
 
 
-def display_programs_list(private_invitations, silent_mode):
+def extract_programs_list(private_invitations, silent_mode):
     data = []
-    print()
 
     for pi in private_invitations:
         name = get_name(pi['program']['title'])
@@ -313,19 +329,14 @@ def display_programs_list(private_invitations, silent_mode):
         else:
             if not silent_mode:
                 print(f"[>] Program {name} is now disabled")
-            
-    results = PrettyTable(field_names=["Name", "Slug"])
-    results.add_rows(data)
-    results.align = "l"
-    
-    print("\n")
-    print(results)
+
+    return data        
 
 
-def display_programs_info(private_invitations, silent_mode):
+
+def extract_programs_info(private_invitations, silent_mode):
     
     data = []
-    print()
     
     for pi in private_invitations:
         points = 0
@@ -528,21 +539,10 @@ def display_programs_info(private_invitations, silent_mode):
             
     data.sort(key=lambda x: x[0], reverse=True)
     
-    results = PrettyTable(field_names=["Pts", "Name", "Creation date", "Last update", "Last hacktivity", "VPN", "Scopes", "Wildcard", "Reports", "Reports/scope", "Last 24h reports", "Last 7d reports", "Last 1m reports", "My reports", "HoF", "Credz"])
-    results.add_rows(data)
-    results.align = "c"
-    results.align["Name"] = "l"
-    
-    print("\n\n")
-    print(results)
+    return data
 
 
-def display_programs_scopes(private_invitations, program_slug, args):
-    print()
-    
-    silent_mode = args.silent_mode
-    output_format = args.format
-    output_output = args.output
+def extract_programs_scopes(private_invitations, program_slug, silent=True):
 
     scope_web = set()
     scope_wildcard = set()
@@ -628,43 +628,17 @@ def display_programs_scopes(private_invitations, program_slug, args):
                     else:
                         scope_misc.add(scope)
         else:
-            if not silent_mode:
+            if not silent:
                 print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")
 
-    print(green("\n\n[*] All scopes extracted : "))
+    print(green("\n\n[*] All scopes extracted"))   
 
-    print(orange(f" * Web scope : {len(scope_web)}"))
+    data = {
+        "web": list(scope_web),
+        "wildcard": list(scope_wildcard),
+        "ip": list(scope_ip),
+        "mobile": list(scope_mobile),
+        "misc": list(scope_misc)
+    }
 
-    if output_format == "json":
-        data = {
-            "web": scope_web,
-            "wildcard": scope_wildcard,
-            "ip": scope_ip,
-            "mobile": scope_mobile,
-            "misc": scope_misc
-        }
-
-        output_file = args.output if args.output else "data.json"
-        with open(output_file, "w") as f:
-            json.dump(data, f, indent=4)
-        print(green(f"[+] Data saved to {output_file}"))
-        
-    elif output_format == "plain":
-        with open("scope_web.txt", "w") as f:
-            f.write("\n".join(scope_web)) 
-
-        print(orange(f" * Wildcards scope : {len(scope_wildcard)}"))
-        with open("scope_wildcard.txt", "w") as f:
-            f.write("\n".join(scope_wildcard)) 
-
-        print(orange(f" * IPs scope : {len(scope_ip)}"))
-        with open("scope_ip.txt", "w") as f:
-            f.write("\n".join(scope_ip))
-
-        print(orange(f" * Mobile scope : {len(scope_mobile)}"))
-        with open("scope_mobile.txt", "w") as f:
-            f.write("\n".join(scope_mobile))
-
-        print(orange(f" * Misc scope : {len(scope_misc)}"))
-        with open("scope_misc.txt", "w") as f:
-            f.write("\n".join(scope_misc))
+    return data

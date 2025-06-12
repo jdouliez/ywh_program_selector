@@ -1,4 +1,11 @@
+# Dev things
 __pycache__
+build
 .vscode
-my-ids.json
+ywh_program_selector.egg-info
+
+# Possible output
 scope_*.txt
+data.json
+my-ids.json
+
