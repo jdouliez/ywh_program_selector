@@ -1,5 +1,5 @@
 
-![Logo](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/banner.png))
+![Logo](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/banner.png)
 
 <p align="center">    
     YWH Programs Selector is a CLI tool to filter bug bounty programs from platforms like YesWeHack.  
