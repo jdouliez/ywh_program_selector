@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='ywh_program_selector',
-    version='0.1.0',
+    version='0.1.1',
     packages=find_packages(),
-    install_requires=open("requirements.txt").readlines(),
+    install_requires=["requests", "tqdm", "prettytable", "colorama", "pyotp", "unidecode"],
     entry_points={
         'console_scripts': [
-            'ywh_program_selector = ywh_program_selector.ywh_program_selector:main',
+            'ywh-program-selector = ywh_program_selector.ywh_program_selector:main',
         ],
     },
     author="@_Ali4s_",

@@ -4,6 +4,9 @@ build
 .vscode
 ywh_program_selector.egg-info
 
+# Pypi
+dist
+
 # Possible output
 scope_*.txt
 data.json

@@ -34,13 +34,13 @@ Authentication can be fully automated or provided manually by a bearer.
 
 ## Installation
 ```bash
-$> pip install ywh_program_selector
+$> pip install ywh-program-selector
 ```
 
 ## Authentication  
 If you want to fully automate the authentication part, you will be asked to provide your username/email, your password and your TOTP secret key.
 
-All credential are stored locally in `$HOME/.config/ywh_program_selector/credentials`.
+All credential are stored locally in `$HOME/.config/ywh-program-selector/credentials`.
 
 **How to obtain my TOTP secret key?**  
 This data is only displayed once when you set up your OTP authentication from the YWH website.
@@ -50,11 +50,11 @@ If you have not noted it previously, you must deactivate and reactivate your MFA
 ## Usage
 
 ```bash
-usage: ywh_program_selector [-h] [--silent] [--force-refresh] (--token TOKEN | --local-auth | --no-auth)
+usage: ywh-program-selector [-h] [--silent] [--force-refresh] (--token TOKEN | --local-auth | --no-auth)
                             (--show | --collab-export-ids | --collaborations | --get-progs | --extract-scopes | --find-by-scope FIND_BY_SCOPE)
                             [--ids-files IDS_FILES] [--program PROGRAM] [-o OUTPUT] [-f {json,plain}]
 
-The ywh_program_selector project is a tool designed to help users manage and prioritize their YesWeHack (YWH) private programs
+The ywh-program-selector project is a tool designed to help users manage and prioritize their YesWeHack (YWH) private programs
 
 options:
   -h, --help                               Show this help message and exit
@@ -79,33 +79,33 @@ options:
 
 - **Show programs**: 
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --show 
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --show 
   ```
   ![Tool results](./doc/results.png)
 
 - **Export your collaboration IDs**: 
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --collab-export-ids -o my-ids.json
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --collab-export-ids -o my-ids.json
   ```
 - **Find possible collaborations from others hunters ids**: 
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --find-collaborations --ids-files "my-ids.json, hunter1-ids.json"
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --find-collaborations --ids-files "my-ids.json, hunter1-ids.json"
   ```
   ![Collaboration feature](./doc/collaborations.png)
 
 - **Extract all scopes**: 
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --local-auth -o /tmp/test.json
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --local-auth -o /tmp/test.json
   ```
 
 - **Extract your private scopes for one program**
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --program <PROG_SLUG>
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --program <PROG_SLUG>
   ```
 
 - **Display programs list with slugs**
   ```bash
-  $> ywh_program_selector [--token <YWH_TOKEN>] [--local-auth] --get-progs
+  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --get-progs
   ```
 
 ### Options
@@ -116,7 +116,7 @@ options:
 - `--no-auth`: Do not authenticate to YWH.
 
 ## Configuration
-- **Credentials**: Stored in `$HOME/.config/ywh_program_selector/credentials`. This file is managed by the tool.
+- **Credentials**: Stored in `$HOME/.config/ywh-program-selector/credentials`. This file is managed by the tool.
 - **Output Formats**: JSON and plain text supported.
 
 ## License
