@@ -31,6 +31,9 @@ if __name__ == "__main__":
 
     parser.add_argument('--ids-files', help='Comma separated list of paths to other hunter IDs. Ex. user1.json,user2.json')
     parser.add_argument('--program', help='Program slug')
+    parser.add_argument('-o', '--output', help='Output file path')
+    parser.add_argument('-f', '--format', choices=['json', 'plain'], default='plain', help='Output format (json, plain)')
+    
     args = parser.parse_args()
 
     if not args.silent:
@@ -118,7 +121,7 @@ if __name__ == "__main__":
     # Extract program scopes
     elif args.extract_scopes:
         program = args.program if args.program else "ALL"
-        display_programs_scopes(private_invitations, program, args.silent)
+        display_programs_scopes(private_invitations, program, args)
 
     # Display all programs info
     elif args.show:

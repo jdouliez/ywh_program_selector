@@ -537,9 +537,13 @@ def display_programs_info(private_invitations, silent_mode):
     print(results)
 
 
-def display_programs_scopes(private_invitations, program_slug, silent_mode):
+def display_programs_scopes(private_invitations, program_slug, args):
     print()
     
+    silent_mode = args.silent_mode
+    output_format = args.format
+    output_output = args.output
+
     scope_web = set()
     scope_wildcard = set()
     scope_mobile = set()
@@ -630,21 +634,37 @@ def display_programs_scopes(private_invitations, program_slug, silent_mode):
     print(green("\n\n[*] All scopes extracted : "))
 
     print(orange(f" * Web scope : {len(scope_web)}"))
-    with open("scope_web.txt", "w") as f:
-        f.write("\n".join(scope_web)) 
 
-    print(orange(f" * Wildcards scope : {len(scope_wildcard)}"))
-    with open("scope_wildcard.txt", "w") as f:
-        f.write("\n".join(scope_wildcard)) 
+    if output_format == "json":
+        data = {
+            "web": scope_web,
+            "wildcard": scope_wildcard,
+            "ip": scope_ip,
+            "mobile": scope_mobile,
+            "misc": scope_misc
+        }
 
-    print(orange(f" * IPs scope : {len(scope_ip)}"))
-    with open("scope_ip.txt", "w") as f:
-        f.write("\n".join(scope_ip))
+        output_file = args.output if args.output else "data.json"
+        with open(output_file, "w") as f:
+            json.dump(data, f, indent=4)
+        print(green(f"[+] Data saved to {output_file}"))
+        
+    elif output_format == "plain":
+        with open("scope_web.txt", "w") as f:
+            f.write("\n".join(scope_web)) 
 
-    print(orange(f" * Mobile scope : {len(scope_mobile)}"))
-    with open("scope_mobile.txt", "w") as f:
-        f.write("\n".join(scope_mobile))
+        print(orange(f" * Wildcards scope : {len(scope_wildcard)}"))
+        with open("scope_wildcard.txt", "w") as f:
+            f.write("\n".join(scope_wildcard)) 
 
-    print(orange(f" * Misc scope : {len(scope_misc)}"))
-    with open("scope_misc.txt", "w") as f:
-        f.write("\n".join(scope_misc))
+        print(orange(f" * IPs scope : {len(scope_ip)}"))
+        with open("scope_ip.txt", "w") as f:
+            f.write("\n".join(scope_ip))
+
+        print(orange(f" * Mobile scope : {len(scope_mobile)}"))
+        with open("scope_mobile.txt", "w") as f:
+            f.write("\n".join(scope_mobile))
+
+        print(orange(f" * Misc scope : {len(scope_misc)}"))
+        with open("scope_misc.txt", "w") as f:
+            f.write("\n".join(scope_misc))
