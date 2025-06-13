@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from colorama import Fore, Style
 from tqdm import tqdm
 from unidecode import unidecode
+from prettytable import PrettyTable
 from .config import *
 
 
@@ -85,6 +86,7 @@ def get_ips_from_subnet(subnet_string):
             return {str(ip) for ip in network.hosts()}
 
     except ValueError as e:
+        print(f"Input {subnet_string} is not a valid subnet", e)
         return set()  # Return empty set on invalid input
 
 
@@ -157,7 +159,8 @@ def is_valid_domain(url_string):
 
         return True
 
-    except Exception:
+    except Exception as e:
+        print(f"Input {url_string} is not a valid domain", e)
         return False
 
 
@@ -632,15 +635,13 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
             if not silent:
                 print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")
 
-    print(green("\n\n[*] All scopes extracted"))   
+    print(green("[*] All scopes extracted"))   
 
-    data = {
+    return {
         "web": list(scope_web),
         "wildcard": list(scope_wildcard),
         "ip": list(scope_ip),
         "mobile": list(scope_mobile),
         "misc": list(scope_misc)
     }
-
-    return data
 
