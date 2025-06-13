@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from colorama import Fore, Style
 from tqdm import tqdm
 from unidecode import unidecode
-
 from .config import *
 
 
@@ -555,7 +554,8 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
             if program_slug == "ALL" or program_slug.lower() == pi['program']['slug'].lower():
                 for scope in pi['program']["scopes"]:
 
-                    scope = unidecode(scope['scope']).split()[0].rstrip("/*").replace(":443","")
+                    # Attention : This can add weird behaviour on spaced scopes
+                    scope = unidecode(scope['scope']).split()[0].rstrip("/*").replace(":443","").lower()
 
                     if scope.replace("https://","").startswith("*."):
                         if "|" in scope and "(" in scope and ")" in scope:
@@ -563,23 +563,27 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
                             if match.group(1):  # Extensions are at the start of the string
                                 extensions = match.group(1).split('|')
                                 base_domain = match.group(2)
-                                domains = [f"{ext}.{base_domain}" for ext in extensions]
+                                domains = [f"*.{ext}.{base_domain}" for ext in extensions]
                             else:  # Extensions are at the end of the string
                                 base_domain = match.group(3)
                                 extensions = match.group(4).split('|')
-                                domains = [f"{base_domain}{ext.strip()}" for ext in extensions]
+                                domains = [f"*.{base_domain}{ext.strip()}" for ext in extensions]
                         else:
                             domains = [scope]
 
                         for s in domains:
-                            scope_wildcard.add(s.replace("https://","").replace("*.",""))
+                            scope_wildcard.add(s.replace("https://",""))
+                    elif ".*." in scope.replace("https://",""):
+                        scope_wildcard.add(scope)
+                    elif "-*." in scope.replace("https://",""):
+                        scope_wildcard.add(scope)
                     elif "*" in scope:
                         scope_misc.add(scope)
                     elif "apps.apple.com" in scope or "play.google.com" in scope or ".apk" in scope or ".ipa" in scope:
                         scope_mobile.add(scope)
                     elif is_ip(scope):
                         scope_ip.add(scope)
-                    elif "-" in scope or ("/" in scope and re.search(r'\/\d{1,2}$', scope)):
+                    elif not re.search(r'[a-zA-Z]', scope) and ("-" in scope or ("/" in scope and re.search(r'\/\d{1,2}$', scope))):
                         for s in get_ips_from_subnet(scope):
                             scope_ip.add(s)
                     elif "|" in scope and "(" in scope and ")" in scope:
@@ -620,11 +624,8 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
                              domains = [f"{base_prefix}{variation}{base_suffix}" for variation in variations]
                              for s in domains:
                                  scope_web.add(s)
-
                     elif is_valid_domain(scope):
                         scope_web.add(scope if scope.startswith("http") else f"https://{scope}")
-                    elif "." not in scope:
-                        pass
                     else:
                         scope_misc.add(scope)
         else:
@@ -642,3 +643,4 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
     }
 
     return data
+
