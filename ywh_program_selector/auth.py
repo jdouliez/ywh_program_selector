@@ -6,11 +6,22 @@ from .config import YWH_LOCAL_CONFIG, YWH_LOCAL_CONFIG_CREDZ
 from .utils import red
 
 
-def get_credentials():
+def get_credentials(file_path = None):
     
     credentials = {}
 
-    if not YWH_LOCAL_CONFIG_CREDZ.exists():
+    ## Provided path
+    if file_path:
+        try:
+            with open(file_path, 'r') as f:
+                credentials = json.load(f)
+            print(f"[*] Using credentials from {file_path}.")            
+        except Exception as e:
+            print(red(f"[!] Error reading configuration : {e}"))
+            return None
+
+    ## No local file
+    elif not YWH_LOCAL_CONFIG_CREDZ.exists():
         YWH_LOCAL_CONFIG.mkdir(parents=True, exist_ok=True)
         
         email = input("Input your ywh email address (stored locally) : ")
@@ -28,6 +39,7 @@ def get_credentials():
             print(red(f"[!] Error saving configuration : {e}"))
             return None
 
+    # Local file
     else:
         try:
             with open(YWH_LOCAL_CONFIG_CREDZ, 'r') as f:
@@ -40,8 +52,8 @@ def get_credentials():
     return credentials
 
 
-def get_token_from_credential():
-    credentials = get_credentials()
+def get_token_from_credential(file_path = None):
+    credentials = get_credentials(file_path)
 
     if not credentials:
         exit(1)
