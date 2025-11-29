@@ -1,7 +1,7 @@
 from logging import Logger, getLogger
 import requests, pyotp, datetime, time
-from config import YWH_API
-from utils import green
+from ywh_program_selector.config import YWH_API
+from ywh_program_selector.utils import green
 
 logger: Logger = getLogger(__name__)    
  

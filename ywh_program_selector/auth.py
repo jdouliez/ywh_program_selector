@@ -1,9 +1,8 @@
 import os
 import json
 from getpass import getpass
-from YesWeHackApi import YesWeHackApi
-from config import YWH_LOCAL_CONFIG, YWH_LOCAL_CONFIG_CREDZ
-from utils import red
+from .YesWeHackApi import YesWeHackApi
+from .utils import red
 
 
 def get_credentials(file_path = None):

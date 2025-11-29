@@ -5,9 +5,9 @@ import os
 from colorama import init
 from prettytable import PrettyTable
 
-from auth import get_token_from_credential
-from config import DATASOURCE_MAX_AGE, YWH_LOCAL_CONFIG_CREDZ, YWH_PROGS_FILE
-from utils import (
+from ywh_program_selector.auth import get_token_from_credential
+from ywh_program_selector.config import DATASOURCE_MAX_AGE, YWH_LOCAL_CONFIG_CREDZ, YWH_PROGS_FILE
+from ywh_program_selector.utils import (
     analyze_common_ids,
     banner,
     extract_programs_info,

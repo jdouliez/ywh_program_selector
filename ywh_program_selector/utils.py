@@ -1,5 +1,6 @@
 import ipaddress
 import json
+import os
 import re
 import sys
 import time
@@ -11,7 +12,7 @@ from colorama import Fore, Style
 from tqdm import tqdm
 from unidecode import unidecode
 from prettytable import PrettyTable
-from config import *
+from ywh_program_selector.config import *
 
 
 def banner():
