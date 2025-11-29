@@ -5,9 +5,9 @@ import os
 from colorama import init
 from prettytable import PrettyTable
 
-from .auth import get_token_from_credential
-from .config import DATASOURCE_MAX_AGE, YWH_PROGS_FILE
-from .utils import (
+from auth import get_token_from_credential
+from config import DATASOURCE_MAX_AGE, YWH_LOCAL_CONFIG_CREDZ, YWH_PROGS_FILE
+from utils import (
     analyze_common_ids,
     banner,
     extract_programs_info,
@@ -36,6 +36,7 @@ def main():
     auth_group = parser.add_mutually_exclusive_group(required=True)
     auth_group.add_argument('--token', help='Use the YesWeHack authorization bearer for auth')
     auth_group.add_argument('--local-auth', action='store_true', help='Use local credentials for auth')
+    auth_group.add_argument('--auth-file', help='Local credentials file for auth')
     auth_group.add_argument('--no-auth', action='store_true', help='Do not authenticate to YWH')
 
     options_group = parser.add_mutually_exclusive_group(required=True)
@@ -57,9 +58,21 @@ def main():
         # Print banner because it's cool
         banner()
 
+    if args.auth_file and not os.path.exists(args.auth_file):
+        print(red(f"[>] Provided authentication file {args.auth_file} does not exist.."))
+        exit(1)
+
+    if not args.auth_file:
+        if not os.path.exists(YWH_LOCAL_CONFIG_CREDZ):
+            print(orange(f"[>] Default authentication file {YWH_LOCAL_CONFIG_CREDZ} does not exist.."))
+            os.makedirs(YWH_LOCAL_CONFIG_CREDZ.parent, exist_ok=True)
+        auth_file = YWH_LOCAL_CONFIG_CREDZ
+    else:
+        auth_file = args.auth_file
+
     if not os.path.exists(YWH_PROGS_FILE):
         if not args.no_auth:
-            token = get_token_from_credential() if not args.token else args.token
+            token = get_token_from_credential(auth_file) if not args.token else args.token
             print(orange("[>] Local datasource does not exist. Fetching data.."))
             private_invitations = get_data_from_ywh(token)
         else:
@@ -67,7 +80,7 @@ def main():
             exit(1)
     elif args.force_refresh:
         if not args.no_auth:
-            token = get_token_from_credential() if not args.token else args.token
+            token = get_token_from_credential(auth_file) if not args.token else args.token
             print(orange("[>] Local datasource cache refresh. Fetching data.."))
             private_invitations = get_data_from_ywh(token)
         else:
@@ -78,7 +91,7 @@ def main():
         age_in_days = get_date_from(file_mtime)
         if age_in_days > DATASOURCE_MAX_AGE:
             if not args.no_auth:
-                token = get_token_from_credential() if not args.token else args.token
+                token = get_token_from_credential(auth_file) if not args.token else args.token
                 print(orange("[>] Local datasource is outdated. Fetching fresh data"))
                 private_invitations = get_data_from_ywh(token)
             else:

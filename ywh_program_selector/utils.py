@@ -11,7 +11,7 @@ from colorama import Fore, Style
 from tqdm import tqdm
 from unidecode import unidecode
 from prettytable import PrettyTable
-from .config import *
+from config import *
 
 
 def banner():
