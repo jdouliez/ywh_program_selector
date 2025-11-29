@@ -260,12 +260,12 @@ def fetch_all_v2(path, session, resultsPerPage=25):
     return all_items
 
 
-def get_data_from_ywh(token):
+def get_data_from_ywh(token, output_file):
 
     session = requests.Session()
     session.headers = {"Authorization": f"Bearer {token}"}
 
-    print(f"[*] Datasource file : {YWH_PROGS_FILE}...")
+    print(f"[*] Datasource file : {output_file}...")
 
     res = session.get(f"{YWH_API}/user/members")
     if res.status_code == 200:
@@ -305,7 +305,7 @@ def get_data_from_ywh(token):
             else:
                 print(orange(f"[!] Program {pi['program']['name']} responded with status code {res.status_code}."))
 
-        with open(YWH_PROGS_FILE, 'w') as file:
+        with open(output_file, 'w') as file:
             json.dump(private_invitations, file, indent=4)
 
         return private_invitations
@@ -634,9 +634,7 @@ def extract_programs_scopes(private_invitations, program_slug, silent=True):
                         scope_misc.add(scope)
         else:
             if not silent:
-                print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")
-
-    print(green("[*] All scopes extracted"))   
+                print(f"[>] Program {get_name(pi['program']['title'])} is now disabled")  
 
     return {
         "web": list(scope_web),

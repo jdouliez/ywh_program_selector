@@ -74,7 +74,7 @@ def main():
         if not args.no_auth:
             token = get_token_from_credential(auth_file) if not args.token else args.token
             print(orange("[>] Local datasource does not exist. Fetching data.."))
-            private_invitations = get_data_from_ywh(token)
+            private_invitations = get_data_from_ywh(token, YWH_PROGS_FILE)
         else:
             print(red("[>] Local datasource does not exist and no authentication provided. Exiting.."))
             exit(1)
@@ -82,7 +82,7 @@ def main():
         if not args.no_auth:
             token = get_token_from_credential(auth_file) if not args.token else args.token
             print(orange("[>] Local datasource cache refresh. Fetching data.."))
-            private_invitations = get_data_from_ywh(token)
+            private_invitations = get_data_from_ywh(token, YWH_PROGS_FILE)
         else:
             print(red("[>] Local datasource cannot be refreshed without authentication method. Use --token or --local-auth. Exiting..."))
             exit(1)
@@ -93,7 +93,7 @@ def main():
             if not args.no_auth:
                 token = get_token_from_credential(auth_file) if not args.token else args.token
                 print(orange("[>] Local datasource is outdated. Fetching fresh data"))
-                private_invitations = get_data_from_ywh(token)
+                private_invitations = get_data_from_ywh(token, YWH_PROGS_FILE)
             else:
                 print(red("[>] Local datasource is outdated but no authentication provided. Skipping refresh"))
                 private_invitations = None
