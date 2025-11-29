@@ -29,7 +29,7 @@ def main():
     init()
 
     # Arguments
-    parser = argparse.ArgumentParser(description='The ywh_program_selector project is a tool designed to help users manage and prioritize their YesWeHack (YWH) private programs.')
+    parser = argparse.ArgumentParser(description='This project is a tool designed to help bug hunters manage and prioritize their YesWeHack (YWH) private programs.')
     parser.add_argument('--silent', action='store_true', help='Do not print banner')
     parser.add_argument('--force-refresh', action='store_true', help='Force data refresh')
 
