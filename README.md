@@ -30,19 +30,21 @@ Authentication can be fully automated or provided manually by a bearer.
 - [X] **Collaboration**: Identifies common programs with other hunters.
 - [X] **Scope Extraction**: Extracts program scopes for further analysis.
 - [X] **Authentication**: Supports both automated and manual methods.
-- [ ] **Scope finding**: Find a program from a specific scope url
+- [X] **Scope Finding**: Find a program from a specific scope URL.
 
 ## Installation
 
 ```bash
-$> pip install ywh-program-selector
+pip install ywh-program-selector
 ```
+
+**Requirements**: Python >= 3.9
 
 ## Authentication
 
 If you want to fully automate the authentication part, you will be asked to provide your username/email, your password and your TOTP secret key.
 
-All credential are stored locally in `$HOME/.config/ywh-program-selector/credentials`.
+All credentials are stored locally in `$HOME/.config/ywh_program_selector/credentials`.
 
 **How to obtain my TOTP secret key?**
 This data is only displayed once when you set up your OTP authentication from the YWH website.
@@ -51,81 +53,151 @@ If you have not noted it previously, you must deactivate and reactivate your MFA
 ## Usage
 
 ```bash
-usage: ywh-program-selector [-h] [--silent] [--force-refresh] (--token TOKEN | --local-auth | --no-auth)
-                            (--show | --collab-export-ids | --collaborations | --get-progs | --extract-scopes | --find-by-scope FIND_BY_SCOPE)
+usage: ywh-program-selector [-h] [--silent] [--force-refresh]
+                            (--token TOKEN | --local-auth | --auth-file AUTH_FILE | --no-auth)
+                            (--show | --collab-export-ids | --collaborations | --get-progs | --extract-scopes | --find-by-scope SCOPE)
                             [--ids-files IDS_FILES] [--program PROGRAM] [-o OUTPUT] [-f {json,plain}]
 
-The ywh-program-selector project is a tool designed to help users manage and prioritize their YesWeHack (YWH) private programs
+CLI tool to help bug hunters manage and prioritize their YesWeHack (YWH) private programs.
 
 options:
-  -h, --help                               Show this help message and exit
-  --silent                                 Do not print banner
-  --force-refresh                          Force data refresh
-  --token TOKEN                            Use the YesWeHack authorization bearer for auth
-  --local-auth                             Use local credentials for auth
-  --no-auth                                Do not authenticate to YWH
-  --show                                   Display all programs info
-  --collab-export-ids                      Export all programs collaboration ids
-  --collaborations                         Show collaboration programs with other hunters
-  --get-progs                              Displays programs simple list with slugs
-  --extract-scopes                         Extract program scopes
-  --find-by-scope FIND_BY_SCOPE            Find a program by one of its scope
-  --ids-files IDS_FILES                    Comma separated list of paths to other hunter IDs. Ex. user1.json,user2.json
-  --program PROGRAM                        Program slug
-  -o OUTPUT, --output OUTPUT               Output file path
-  -f {json,plain}, --format {json,plain}   Output format (json, plain)
+  -h, --help                          Show this help message and exit
+  --silent                            Do not print banner
+  --force-refresh                     Force data refresh
 
+Authentication:
+  --token TOKEN                       Use the YesWeHack authorization bearer for auth
+  --local-auth                        Use local credentials for auth
+  --auth-file AUTH_FILE               Path to credentials file for auth
+  --no-auth                           Do not authenticate to YWH
+
+Actions:
+  --show                              Display all programs info with scoring
+  --collab-export-ids                 Export all programs collaboration IDs
+  --collaborations                    Show collaboration programs with other hunters
+  --get-progs                         Display programs simple list with slugs
+  --extract-scopes                    Extract program scopes
+  --find-by-scope SCOPE               Find a program by one of its scopes
+
+Additional Options:
+  --ids-files IDS_FILES               Comma separated list of paths to other hunter IDs
+  --program PROGRAM                   Program slug (for --extract-scopes)
+  -o, --output OUTPUT                 Output file/directory path
+  -f, --format {json,plain}           Output format (default: plain)
 ```
 
 ### Basic Commands
 
-- **Show programs**:
+- **Show programs with scoring**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --show 
+  ywh-program-selector --local-auth --show
+  # or with token
+  ywh-program-selector --token <YWH_TOKEN> --show
   ```
 
   ![Tool results](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/results.png)
+
 - **Export your collaboration IDs**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --collab-export-ids -o my-ids.json
+  ywh-program-selector --local-auth --collab-export-ids -o my-ids.json
   ```
-- **Find possible collaborations from others hunters ids**:
+
+- **Find possible collaborations from other hunters' IDs**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --find-collaborations --ids-files "my-ids.json, hunter1-ids.json"
+  ywh-program-selector --local-auth --collaborations --ids-files "my-ids.json,hunter1-ids.json"
   ```
 
   ![Collaboration feature](https://raw.githubusercontent.com/jdouliez/ywh_program_selector/refs/heads/main/doc/collaborations.png)
+
 - **Extract all scopes**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --local-auth -o /tmp/test.json
+  # JSON format
+  ywh-program-selector --local-auth --extract-scopes -o scopes.json -f json
+
+  # Plain text (multiple files in output directory)
+  ywh-program-selector --local-auth --extract-scopes -o /tmp/scopes -f plain
   ```
-- **Extract your private scopes for one program**
+
+- **Extract scopes for a specific program**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --extract-scopes --program <PROG_SLUG>
+  ywh-program-selector --local-auth --extract-scopes --program <PROG_SLUG>
   ```
-- **Display programs list with slugs**
+
+- **Display programs list with slugs**:
 
   ```bash
-  $> ywh-program-selector [--token <YWH_TOKEN>] [--local-auth] --get-progs
+  ywh-program-selector --local-auth --get-progs
   ```
 
-### Options
+- **Find program by scope URL**:
 
-- `--silent`: Suppress banner output.
-- `--force-refresh`: Force data refresh.
-- `--token <TOKEN>`: Use YesWeHack authorization bearer for authentication.
-- `--local-auth`: Use local credentials for authentication.
-- `--no-auth`: Do not authenticate to YWH.
+  ```bash
+  ywh-program-selector --local-auth --find-by-scope "example.com"
+  ywh-program-selector --local-auth --find-by-scope "https://api.example.com"
+  ```
+
+### Authentication Options
+
+| Option | Description |
+|--------|-------------|
+| `--token <TOKEN>` | Use YesWeHack authorization bearer directly |
+| `--local-auth` | Use credentials from default config path |
+| `--auth-file <PATH>` | Use credentials from a custom file path |
+| `--no-auth` | Use cached data without authentication |
+
+### Other Options
+
+| Option | Description |
+|--------|-------------|
+| `--silent` | Suppress banner output |
+| `--force-refresh` | Force data refresh from API |
+| `-o, --output` | Output file/directory path |
+| `-f, --format` | Output format: `json` or `plain` |
 
 ## Configuration
 
-- **Credentials**: Stored in `$HOME/.config/ywh-program-selector/credentials`. This file is managed by the tool.
+- **Credentials**: Stored in `$HOME/.config/ywh_program_selector/credentials`. This file is managed by the tool and has restricted permissions (0600).
+- **Cache**: Program data is cached in the system temp directory and auto-refreshes after 2 days.
 - **Output Formats**: JSON and plain text supported.
+
+### Scoring Configuration
+
+You can customize the scoring thresholds by modifying `ywh_program_selector/config.py`:
+
+```python
+# Scope thresholds
+SCOPE_COUNT_THRESHOLD_1 = 3      # Programs with <= 3 scopes get low score
+SCOPE_COUNT_THRESHOLD_2 = 8      # Programs with <= 8 scopes get medium score
+
+# Report thresholds  
+REPORT_COUNT_PER_SCOPE_THRESHOLD_1 = 5   # Low competition
+REPORT_COUNT_PER_SCOPE_THRESHOLD_2 = 15  # Medium competition
+
+# And more...
+```
+
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/jdouliez/ywh_program_selector.git
+cd ywh_program_selector
+
+# Install in development mode
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Format code
+black ywh_program_selector/
+isort ywh_program_selector/
+```
 
 ## License
 

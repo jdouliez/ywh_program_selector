@@ -1,3 +1,72 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "ywh-program-selector"
+version = "0.2.0"
+description = "CLI tool to help bug hunters manage and prioritize their YesWeHack (YWH) private programs"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "@_Ali4s_", email = "jordan.douliez@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+keywords = ["bug-bounty", "yeswehack", "security", "hunting", "ywh"]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.28.0",
+    "tqdm>=4.64.0",
+    "prettytable>=3.0.0",
+    "colorama>=0.4.5",
+    "pyotp>=2.7.0",
+    "unidecode>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "types-requests>=2.28.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/jdouliez/ywh_program_selector"
+Repository = "https://github.com/jdouliez/ywh_program_selector"
+Issues = "https://github.com/jdouliez/ywh_program_selector/issues"
+
+[project.scripts]
+ywh-program-selector = "ywh_program_selector.ywh_program_selector:main"
+
+[tool.setuptools.packages.find]
+include = ["ywh_program_selector*"]
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

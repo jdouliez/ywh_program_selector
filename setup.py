@@ -1,25 +1,10 @@
-from setuptools import setup, find_packages
+#!/usr/bin/env python3
+"""
+Minimal setup.py for backwards compatibility.
+All configuration is in pyproject.toml.
+"""
 
-setup(
-    name='ywh_program_selector',
-    version='0.1.7',
-    packages=find_packages(),
-    install_requires=["requests", "tqdm", "prettytable", "colorama", "pyotp", "unidecode"],
-    entry_points={
-        'console_scripts': [
-            'ywh-program-selector = ywh_program_selector.ywh_program_selector:main',
-        ],
-    },
-    author="@_Ali4s_",
-    author_email="jordan.douliez@gmail.com",
-    description='The YWH Program Selector project is a tool designed to help bug hunters manage and prioritize their YesWeHack (YWH) private programs',
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
-    url='https://github.com/jdouliez/ywh_program_selector',
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-    ],
-    python_requires='>=3.6',
-)
+from setuptools import setup
+
+if __name__ == "__main__":
+    setup()
